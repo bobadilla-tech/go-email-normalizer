@@ -1,11 +1,5 @@
 # go-email-normalizer - email normalization for Go
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/bobadilla-tech/go-email-normalizer.svg)](https://pkg.go.dev/github.com/bobadilla-tech/go-email-normalizer)
-[![codecov](https://codecov.io/github/bobadilla-tech/go-email-normalizer/graph/badge.svg?token=E1TagDCBXc)](https://codecov.io/gh/bobadilla-tech/go-email-normalizer)
-[![Go Report Card](https://goreportcard.com/badge/github.com/bobadilla-tech/go-email-normalizer)](https://goreportcard.com/report/github.com/bobadilla-tech/go-email-normalizer)
-[![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/bobadilla-tech/go-email-normalizer/blob/master/LICENSE)
-[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)  
-
 This is Golang library for providing a canonical representation of email address. It allows
 to prevent multiple signups. `go-email-normalizer` contains some popular providers but you can easily append others.
 
