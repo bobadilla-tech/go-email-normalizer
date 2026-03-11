@@ -1,4 +1,4 @@
-module github.com/bobadilla-tech/go-email-normalizer/v5
+module github.com/bobadilla-tech/go-email-normalizer
 
 go 1.14
 

@@ -8,7 +8,7 @@ Guidance for agentic coding tools (Copilot, Cursor, OpenCode, etc.) operating in
 
 `go-email-normalizer` is a Go library (not a binary) that normalizes email addresses across major providers (Apple, Fastmail, Google, Microsoft, Protonmail, Rackspace, Rambler, Yahoo, Yandex, Zoho).
 
-- **Module:** `github.com/bobadilla-tech/go-email-normalizer/v5`
+- **Module:** `github.com/bobadilla-tech/go-email-normalizer`
 - **Minimum Go version:** 1.14
 - **Package name:** `emailnormalizer` (all files in root, no subdirectories)
 - **Only external dependency:** `github.com/stretchr/testify v1.6.1` (test assertions)

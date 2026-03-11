@@ -12,7 +12,7 @@ to prevent multiple signups. `go-email-normalizer` contains some popular provide
 ## Download
 
 ```shell
-go get -u github.com/bobadilla-tech/go-email-normalizer/v5
+go get -u github.com/bobadilla-tech/go-email-normalizer
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ package main
 import (
 	"fmt"
 	"strings"
-	normalizer "github.com/bobadilla-tech/go-email-normalizer/v5"
+	normalizer "github.com/bobadilla-tech/go-email-normalizer"
 )
 
 type customRule struct{}
