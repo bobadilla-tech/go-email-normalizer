@@ -23,4 +23,4 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: dimuska139/go-email-normalizer
+          slug: bobadilla-tech/go-email-normalizer
