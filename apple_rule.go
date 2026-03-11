@@ -20,3 +20,28 @@ func (rule *AppleRule) ProcessUsername(username string) string {
 func (rule *AppleRule) ProcessDomain(domain string) string {
 	return "icloud.com"
 }
+
+func (rule *AppleRule) ProcessUsernameWithChanges(username string) (string, []Change) {
+	var changes []Change
+
+	result := strings.ToLower(username)
+	if result != username {
+		changes = append(changes, ChangeLowercase)
+	}
+
+	plusIndex := strings.Index(result, "+")
+	if plusIndex != -1 {
+		changes = append(changes, ChangeRemovedPlusTag)
+		result = result[:plusIndex]
+	}
+
+	return result, changes
+}
+
+func (rule *AppleRule) ProcessDomainWithChanges(domain string) (string, []Change) {
+	result := rule.ProcessDomain(domain)
+	if result != domain {
+		return result, []Change{ChangeCanonicalisedDomain}
+	}
+	return result, nil
+}

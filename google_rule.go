@@ -26,3 +26,34 @@ func (rule *GoogleRule) ProcessDomain(domain string) string {
 		return "gmail.com" // googlemail.com/gmail.com => gmail.com
 	}
 }
+
+func (rule *GoogleRule) ProcessUsernameWithChanges(username string) (string, []Change) {
+	var changes []Change
+
+	result := strings.ToLower(username)
+	if result != username {
+		changes = append(changes, ChangeLowercase)
+	}
+
+	withoutDots := strings.Replace(result, ".", "", -1)
+	if withoutDots != result {
+		changes = append(changes, ChangeRemovedDots)
+	}
+	result = withoutDots
+
+	plusIndex := strings.Index(result, "+")
+	if plusIndex != -1 {
+		changes = append(changes, ChangeRemovedPlusTag)
+		result = result[:plusIndex]
+	}
+
+	return result, changes
+}
+
+func (rule *GoogleRule) ProcessDomainWithChanges(domain string) (string, []Change) {
+	result := rule.ProcessDomain(domain)
+	if result != domain {
+		return result, []Change{ChangeCanonicalisedDomain}
+	}
+	return result, nil
+}

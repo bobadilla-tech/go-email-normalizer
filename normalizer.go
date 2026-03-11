@@ -82,3 +82,72 @@ func (n *Normalizer) Normalize(email string) string {
 
 	return username + "@" + domain
 }
+
+// Normalize2 : converts email to canonical form and returns a NormalizeResult
+// that includes both the normalized address and every transformation applied.
+//
+// Rules registered via AddRule that only implement NormalizingRule (not
+// NormalizingRuleWithChanges) are still fully supported — the normalized
+// address will be correct, but per-rule changes will not be reported.
+// Pre-processing changes (whitespace trimming, trailing-dot removal, domain
+// lowercasing) are always tracked regardless of the rule type.
+func (n *Normalizer) Normalize2(email string) NormalizeResult {
+	seen := make(map[Change]bool)
+	var changes []Change
+
+	addChange := func(c Change) {
+		if !seen[c] {
+			seen[c] = true
+			changes = append(changes, c)
+		}
+	}
+
+	// Step 1: Trim leading/trailing whitespace.
+	prepared := strings.TrimSpace(email)
+	if prepared != email {
+		addChange(ChangeTrimmedWhitespace)
+	}
+
+	// Step 2: Strip trailing dots.
+	trimmed := strings.TrimRight(prepared, ".")
+	if trimmed != prepared {
+		addChange(ChangeRemovedTrailingDot)
+	}
+	prepared = trimmed
+
+	// Step 3: Split on @.
+	parts := strings.Split(prepared, "@")
+	if len(parts) != 2 {
+		return NormalizeResult{Normalized: prepared, Changes: changes}
+	}
+
+	username := parts[0]                // The first part of the address may be case sensitive (RFC 5336)
+	domain := strings.ToLower(parts[1]) // Domain names are case-insensitive (RFC 4343)
+	if domain != parts[1] {
+		addChange(ChangeLowercase)
+	}
+
+	if rule, ok := n.rules[domain]; ok {
+		if detailed, ok := rule.(NormalizingRuleWithChanges); ok {
+			normalizedUsername, usernameChanges := detailed.ProcessUsernameWithChanges(username)
+			normalizedDomain, domainChanges := detailed.ProcessDomainWithChanges(domain)
+			for _, c := range usernameChanges {
+				addChange(c)
+			}
+			for _, c := range domainChanges {
+				addChange(c)
+			}
+			return NormalizeResult{
+				Normalized: normalizedUsername + "@" + normalizedDomain,
+				Changes:    changes,
+			}
+		}
+		// Fallback: rule does not implement NormalizingRuleWithChanges.
+		return NormalizeResult{
+			Normalized: rule.ProcessUsername(username) + "@" + rule.ProcessDomain(domain),
+			Changes:    changes,
+		}
+	}
+
+	return NormalizeResult{Normalized: username + "@" + domain, Changes: changes}
+}

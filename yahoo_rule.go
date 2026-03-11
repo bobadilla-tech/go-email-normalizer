@@ -20,3 +20,24 @@ func (rule *YahooRule) ProcessUsername(username string) string {
 func (rule *YahooRule) ProcessDomain(domain string) string {
 	return domain
 }
+
+func (rule *YahooRule) ProcessUsernameWithChanges(username string) (string, []Change) {
+	var changes []Change
+
+	result := strings.ToLower(username)
+	if result != username {
+		changes = append(changes, ChangeLowercase)
+	}
+
+	dashIndex := strings.Index(result, "-")
+	if dashIndex != -1 {
+		changes = append(changes, ChangeRemovedSubaddress)
+		result = result[:dashIndex]
+	}
+
+	return result, changes
+}
+
+func (rule *YahooRule) ProcessDomainWithChanges(domain string) (string, []Change) {
+	return rule.ProcessDomain(domain), nil
+}
