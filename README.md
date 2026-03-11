@@ -1,13 +1,9 @@
-# go-email-normalizer - email normalization for Go
+# go-email-normalizer
+
+> Fork of [dimuska139/go-email-normalizer](https://github.com/dimuska139/go-email-normalizer)
 
 This is Golang library for providing a canonical representation of email address. It allows
 to prevent multiple signups. `go-email-normalizer` contains some popular providers but you can easily append others.
-
-## Download
-
-```shell
-go get -u github.com/bobadilla-tech/go-email-normalizer
-```
 
 ## Usage
 
