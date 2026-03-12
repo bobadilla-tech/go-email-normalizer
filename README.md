@@ -5,6 +5,13 @@
 This is Golang library for providing a canonical representation of email address. It allows
 to prevent multiple signups. `go-email-normalizer` contains some popular providers but you can easily append others.
 
+> **RFC compliance note:** All normalization transformations (dot removal, `+` tag
+> stripping, domain alias resolution) are applied only for specific, known providers
+> where the behavior is documented. For unknown domains the local part is returned
+> unchanged, consistent with RFC 5321 which treats the local part as opaque to
+> external systems. See [NORMALIZATION.md](NORMALIZATION.md) for the full audit
+> and per-provider rule reference.
+
 ## Usage
 
 ### Normalize
@@ -123,3 +130,6 @@ fmt.Println(err) // invalid email address: "not-an-email@gmailcom"
 * Zoho
 
 Also you can integrate other rules using `AddRule` function (see an example above)
+
+For a detailed breakdown of which transformations each provider applies and the
+RFC standards behind them, see [NORMALIZATION.md](NORMALIZATION.md).
