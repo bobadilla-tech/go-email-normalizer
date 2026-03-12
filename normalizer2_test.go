@@ -72,6 +72,18 @@ func TestNormalizer_Normalize2_InvalidEmailEmptyDomain(t *testing.T) {
 	assert.Empty(t, result.Changes)
 }
 
+// TestNormalizer_Normalize2_InvalidEmailDotlessDomain verifies that a domain
+// without a dot (e.g. "gmailcom") is rejected, closing the gap left by
+// net/mail.ParseAddress which accepted such dotless domains as syntactically
+// valid.
+func TestNormalizer_Normalize2_InvalidEmailDotlessDomain(t *testing.T) {
+	n := NewNormalizer()
+	result, err := n.Normalize2("not-an-email@gmailcom")
+	assert.Error(t, err)
+	assert.Empty(t, result.Normalized)
+	assert.Empty(t, result.Changes)
+}
+
 // TestNormalizer_Normalize2_UnknownDomain verifies that for an unknown domain only
 // domain lowercasing is reported (username is left untouched per RFC 5321).
 func TestNormalizer_Normalize2_UnknownDomain(t *testing.T) {

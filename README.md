@@ -46,12 +46,16 @@ func main() {
 
 ### Normalize2
 
-`Normalize2` accepts any string, validates it as an email address using
-`net/mail.ParseAddress`, and returns a `NormalizeResult` paired with an `error`.
-If the input is not a valid email address, the result is zero-valued and the
-error is non-nil. When the call succeeds, the result pairs the canonical address
-with a list of every transformation applied, in order. Each `Change` value
-appears at most once.
+`Normalize2` accepts any string, validates it as an email address using an
+RFC 5322-compatible regex (sourced from
+[go-playground/validator](https://github.com/go-playground/validator)), and
+returns a `NormalizeResult` paired with an `error`. The validator requires a
+dot-separated domain (e.g. `gmail.com`), so inputs like `user@gmailcom` are
+rejected. Trailing whitespace and trailing dots are stripped before validation,
+so those are accepted. If the input is not a valid email address, the result is
+zero-valued and the error is non-nil. When the call succeeds, the result pairs
+the canonical address with a list of every transformation applied, in order.
+Each `Change` value appears at most once.
 
 ```go
 n := normalizer.NewNormalizer()
@@ -80,9 +84,13 @@ fmt.Println(result.Normalized) // testuser.name@yandex.ru
 fmt.Println(result.Changes)
 // [lowercase removed_plus_signs replaced_hyphens_with_dots canonicalized_domain]
 
-// Invalid input — error is returned, result is zero-valued.
+// Invalid input — no "@" sign.
 _, err = n.Normalize2("notanemail")
-fmt.Println(err) // invalid email address: ...
+fmt.Println(err) // invalid email address: "notanemail"
+
+// Invalid input — dotless domain is rejected.
+_, err = n.Normalize2("not-an-email@gmailcom")
+fmt.Println(err) // invalid email address: "not-an-email@gmailcom"
 ```
 
 #### Change values

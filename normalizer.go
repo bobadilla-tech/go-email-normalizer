@@ -1,8 +1,6 @@
 package emailnormalizer
 
 import (
-	"fmt"
-	"net/mail"
 	"strings"
 )
 
@@ -89,9 +87,12 @@ func (n *Normalizer) Normalize(email string) string {
 // returns a NormalizeResult that includes both the normalized address and
 // every transformation applied.
 //
-// Unlike Normalize, Normalize2 validates the input using net/mail.ParseAddress.
-// If the input is not a valid email address, a zero-valued NormalizeResult and
-// a non-nil error (wrapping the underlying parse error) are returned.
+// Unlike Normalize, Normalize2 validates the input using an RFC 5322-compatible
+// email regex (sourced from github.com/go-playground/validator). It requires a
+// dot-separated domain (e.g. "gmail.com"), so inputs like "user@gmailcom" are
+// rejected. Trailing whitespace and trailing dots are stripped before
+// validation, so those are handled correctly. If the input is not a valid email
+// address, a zero-valued NormalizeResult and a non-nil error are returned.
 //
 // Rules registered via AddRule that only implement NormalizingRule (not
 // NormalizingRuleWithChanges) are still fully supported — the normalized
@@ -122,12 +123,11 @@ func (n *Normalizer) Normalize2(email string) (NormalizeResult, error) {
 	}
 	prepared = trimmed
 
-	// Step 3: Validate using net/mail.ParseAddress and extract the address.
-	addr, parseErr := mail.ParseAddress(prepared)
-	if parseErr != nil {
-		return NormalizeResult{}, fmt.Errorf("invalid email address: %w", parseErr)
+	// Step 3: Validate using the go-playground/validator email regex and extract the address.
+	if err := ValidateEmail(prepared); err != nil {
+		return NormalizeResult{}, err
 	}
-	parts := strings.SplitN(addr.Address, "@", 2)
+	parts := strings.SplitN(prepared, "@", 2)
 
 	username := parts[0]                // The first part of the address may be case sensitive (RFC 5336)
 	domain := strings.ToLower(parts[1]) // Domain names are case-insensitive (RFC 4343)
