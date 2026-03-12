@@ -1,6 +1,8 @@
 package emailnormalizer
 
 import (
+	"fmt"
+	"net/mail"
 	"strings"
 )
 
@@ -83,15 +85,20 @@ func (n *Normalizer) Normalize(email string) string {
 	return username + "@" + domain
 }
 
-// Normalize2 : converts email to canonical form and returns a NormalizeResult
-// that includes both the normalized address and every transformation applied.
+// Normalize2 converts any input string to a canonical email address and
+// returns a NormalizeResult that includes both the normalized address and
+// every transformation applied.
+//
+// Unlike Normalize, Normalize2 validates the input using net/mail.ParseAddress.
+// If the input is not a valid email address, a zero-valued NormalizeResult and
+// a non-nil error (wrapping the underlying parse error) are returned.
 //
 // Rules registered via AddRule that only implement NormalizingRule (not
 // NormalizingRuleWithChanges) are still fully supported — the normalized
 // address will be correct, but per-rule changes will not be reported.
 // Pre-processing changes (whitespace trimming, trailing-dot removal, domain
 // lowercasing) are always tracked regardless of the rule type.
-func (n *Normalizer) Normalize2(email string) NormalizeResult {
+func (n *Normalizer) Normalize2(email string) (NormalizeResult, error) {
 	seen := make(map[Change]bool)
 	var changes []Change
 
@@ -115,11 +122,12 @@ func (n *Normalizer) Normalize2(email string) NormalizeResult {
 	}
 	prepared = trimmed
 
-	// Step 3: Split on @.
-	parts := strings.Split(prepared, "@")
-	if len(parts) != 2 {
-		return NormalizeResult{Normalized: prepared, Changes: changes}
+	// Step 3: Validate using net/mail.ParseAddress and extract the address.
+	addr, parseErr := mail.ParseAddress(prepared)
+	if parseErr != nil {
+		return NormalizeResult{}, fmt.Errorf("invalid email address: %w", parseErr)
 	}
+	parts := strings.SplitN(addr.Address, "@", 2)
 
 	username := parts[0]                // The first part of the address may be case sensitive (RFC 5336)
 	domain := strings.ToLower(parts[1]) // Domain names are case-insensitive (RFC 4343)
@@ -140,14 +148,14 @@ func (n *Normalizer) Normalize2(email string) NormalizeResult {
 			return NormalizeResult{
 				Normalized: normalizedUsername + "@" + normalizedDomain,
 				Changes:    changes,
-			}
+			}, nil
 		}
 		// Fallback: rule does not implement NormalizingRuleWithChanges.
 		return NormalizeResult{
 			Normalized: rule.ProcessUsername(username) + "@" + rule.ProcessDomain(domain),
 			Changes:    changes,
-		}
+		}, nil
 	}
 
-	return NormalizeResult{Normalized: username + "@" + domain, Changes: changes}
+	return NormalizeResult{Normalized: username + "@" + domain, Changes: changes}, nil
 }

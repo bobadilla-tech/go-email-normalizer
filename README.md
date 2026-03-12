@@ -46,27 +46,43 @@ func main() {
 
 ### Normalize2
 
-`Normalize2` returns a `NormalizeResult` that pairs the canonical address with a
-list of every transformation applied, in order. Each `Change` value appears at
-most once.
+`Normalize2` accepts any string, validates it as an email address using
+`net/mail.ParseAddress`, and returns a `NormalizeResult` paired with an `error`.
+If the input is not a valid email address, the result is zero-valued and the
+error is non-nil. When the call succeeds, the result pairs the canonical address
+with a list of every transformation applied, in order. Each `Change` value
+appears at most once.
 
 ```go
 n := normalizer.NewNormalizer()
 
-result := n.Normalize2("First.Last+tag@googlemail.com")
+result, err := n.Normalize2("First.Last+tag@googlemail.com")
+if err != nil {
+	log.Fatal(err)
+}
 fmt.Println(result.Normalized) // firstlast@gmail.com
 fmt.Println(result.Changes)
 // [lowercase removed_dots removed_plus_tag canonicalized_domain]
 
-result = n.Normalize2("User.Name_test-sub+spam@protonmail.com")
+result, err = n.Normalize2("User.Name_test-sub+spam@protonmail.com")
+if err != nil {
+	log.Fatal(err)
+}
 fmt.Println(result.Normalized) // usernametestsub@protonmail.com
 fmt.Println(result.Changes)
 // [lowercase removed_dots removed_underscores removed_hyphens removed_plus_tag]
 
-result = n.Normalize2("Test+User-Name@ya.ru")
+result, err = n.Normalize2("Test+User-Name@ya.ru")
+if err != nil {
+	log.Fatal(err)
+}
 fmt.Println(result.Normalized) // testuser.name@yandex.ru
 fmt.Println(result.Changes)
 // [lowercase removed_plus_signs replaced_hyphens_with_dots canonicalized_domain]
+
+// Invalid input — error is returned, result is zero-valued.
+_, err = n.Normalize2("notanemail")
+fmt.Println(err) // invalid email address: ...
 ```
 
 #### Change values

@@ -10,29 +10,65 @@ import (
 // address produces an empty change list.
 func TestNormalizer_Normalize2_NoChanges(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("test@gmail.com")
+	result, err := n.Normalize2("test@gmail.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "test@gmail.com", result.Normalized)
 	assert.Empty(t, result.Changes)
 }
 
 func TestNormalizer_Normalize2_TrimmedWhitespace(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("  test@gmail.com  ")
+	result, err := n.Normalize2("  test@gmail.com  ")
+	assert.NoError(t, err)
 	assert.Equal(t, "test@gmail.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeTrimmedWhitespace}, result.Changes)
 }
 
 func TestNormalizer_Normalize2_RemovedTrailingDot(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("test@gmail.com.")
+	result, err := n.Normalize2("test@gmail.com.")
+	assert.NoError(t, err)
 	assert.Equal(t, "test@gmail.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeRemovedTrailingDot}, result.Changes)
 }
 
+// TestNormalizer_Normalize2_InvalidEmail verifies that a string without "@" is
+// rejected with a non-nil error and a zero-valued NormalizeResult.
 func TestNormalizer_Normalize2_InvalidEmail(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("notanemail")
-	assert.Equal(t, "notanemail", result.Normalized)
+	result, err := n.Normalize2("notanemail")
+	assert.Error(t, err)
+	assert.Empty(t, result.Normalized)
+	assert.Empty(t, result.Changes)
+}
+
+// TestNormalizer_Normalize2_InvalidEmailMultipleAt verifies that a string with
+// multiple "@" characters is rejected with a non-nil error.
+func TestNormalizer_Normalize2_InvalidEmailMultipleAt(t *testing.T) {
+	n := NewNormalizer()
+	result, err := n.Normalize2("a@b@gmail.com")
+	assert.Error(t, err)
+	assert.Empty(t, result.Normalized)
+	assert.Empty(t, result.Changes)
+}
+
+// TestNormalizer_Normalize2_InvalidEmailEmptyLocal verifies that a string with an
+// empty local part (e.g. "@gmail.com") is rejected with a non-nil error.
+func TestNormalizer_Normalize2_InvalidEmailEmptyLocal(t *testing.T) {
+	n := NewNormalizer()
+	result, err := n.Normalize2("@gmail.com")
+	assert.Error(t, err)
+	assert.Empty(t, result.Normalized)
+	assert.Empty(t, result.Changes)
+}
+
+// TestNormalizer_Normalize2_InvalidEmailEmptyDomain verifies that a string with an
+// empty domain part (e.g. "user@") is rejected with a non-nil error.
+func TestNormalizer_Normalize2_InvalidEmailEmptyDomain(t *testing.T) {
+	n := NewNormalizer()
+	result, err := n.Normalize2("user@")
+	assert.Error(t, err)
+	assert.Empty(t, result.Normalized)
 	assert.Empty(t, result.Changes)
 }
 
@@ -40,7 +76,8 @@ func TestNormalizer_Normalize2_InvalidEmail(t *testing.T) {
 // domain lowercasing is reported (username is left untouched per RFC 5321).
 func TestNormalizer_Normalize2_UnknownDomain(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("User@EXAMPLE.COM")
+	result, err := n.Normalize2("User@EXAMPLE.COM")
+	assert.NoError(t, err)
 	assert.Equal(t, "User@example.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase}, result.Changes)
 }
@@ -49,7 +86,8 @@ func TestNormalizer_Normalize2_UnknownDomain(t *testing.T) {
 // reported when an unknown domain is already lowercase.
 func TestNormalizer_Normalize2_UnknownDomainAlreadyLower(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("User@example.com")
+	result, err := n.Normalize2("User@example.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "User@example.com", result.Normalized)
 	assert.Empty(t, result.Changes)
 }
@@ -58,21 +96,24 @@ func TestNormalizer_Normalize2_UnknownDomainAlreadyLower(t *testing.T) {
 
 func TestNormalizer_Normalize2_Google(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("Test.User+tag@gmail.com")
+	result, err := n.Normalize2("Test.User+tag@gmail.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@gmail.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedDots, ChangeRemovedPlusTag}, result.Changes)
 }
 
 func TestNormalizer_Normalize2_GoogleNoDots(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("TestUser+tag@gmail.com")
+	result, err := n.Normalize2("TestUser+tag@gmail.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@gmail.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedPlusTag}, result.Changes)
 }
 
 func TestNormalizer_Normalize2_GoogleCanonicalDomain(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("test@googlemail.com")
+	result, err := n.Normalize2("test@googlemail.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "test@gmail.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeCanonicalisedDomain}, result.Changes)
 }
@@ -80,7 +121,8 @@ func TestNormalizer_Normalize2_GoogleCanonicalDomain(t *testing.T) {
 // google.com is kept as-is (workspace accounts).
 func TestNormalizer_Normalize2_GoogleDotCom(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("test@google.com")
+	result, err := n.Normalize2("test@google.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "test@google.com", result.Normalized)
 	assert.Empty(t, result.Changes)
 }
@@ -89,14 +131,16 @@ func TestNormalizer_Normalize2_GoogleDotCom(t *testing.T) {
 
 func TestNormalizer_Normalize2_Yahoo(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("TestUser-subaddress@yahoo.com")
+	result, err := n.Normalize2("TestUser-subaddress@yahoo.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@yahoo.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedSubaddress}, result.Changes)
 }
 
 func TestNormalizer_Normalize2_YahooNoDash(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("TestUser@yahoo.com")
+	result, err := n.Normalize2("TestUser@yahoo.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@yahoo.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase}, result.Changes)
 }
@@ -105,7 +149,8 @@ func TestNormalizer_Normalize2_YahooNoDash(t *testing.T) {
 
 func TestNormalizer_Normalize2_Microsoft(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("Test+User@hotmail.com")
+	result, err := n.Normalize2("Test+User@hotmail.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@hotmail.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedPlusSigns}, result.Changes)
 }
@@ -115,7 +160,8 @@ func TestNormalizer_Normalize2_Microsoft(t *testing.T) {
 func TestNormalizer_Normalize2_Apple(t *testing.T) {
 	n := NewNormalizer()
 	// me.com → icloud.com (canonicalized domain) + plus tag stripped
-	result := n.Normalize2("TestUser+tag@me.com")
+	result, err := n.Normalize2("TestUser+tag@me.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@icloud.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedPlusTag, ChangeCanonicalisedDomain}, result.Changes)
 }
@@ -123,7 +169,8 @@ func TestNormalizer_Normalize2_Apple(t *testing.T) {
 func TestNormalizer_Normalize2_AppleICloud(t *testing.T) {
 	n := NewNormalizer()
 	// icloud.com stays as icloud.com — no canonicalization change
-	result := n.Normalize2("TestUser+tag@icloud.com")
+	result, err := n.Normalize2("TestUser+tag@icloud.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@icloud.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedPlusTag}, result.Changes)
 }
@@ -132,7 +179,8 @@ func TestNormalizer_Normalize2_AppleICloud(t *testing.T) {
 
 func TestNormalizer_Normalize2_Fastmail(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("TestUser+tag@fastmail.com")
+	result, err := n.Normalize2("TestUser+tag@fastmail.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@fastmail.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedPlusTag}, result.Changes)
 }
@@ -147,7 +195,8 @@ func TestNormalizer_Normalize2_Protonmail(t *testing.T) {
 	// remove "_":        "usernametest-sub+tag"
 	// remove "-":        "usernametestsub+tag"
 	// strip "+tag":      "usernametestsub"
-	result := n.Normalize2("User.Name_test-sub+tag@protonmail.com")
+	result, err := n.Normalize2("User.Name_test-sub+tag@protonmail.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "usernametestsub@protonmail.com", result.Normalized)
 	assert.Equal(t, []Change{
 		ChangeLowercase,
@@ -160,7 +209,8 @@ func TestNormalizer_Normalize2_Protonmail(t *testing.T) {
 
 func TestNormalizer_Normalize2_ProtonmailNoPunctuation(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("testuser@protonmail.com")
+	result, err := n.Normalize2("testuser@protonmail.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@protonmail.com", result.Normalized)
 	assert.Empty(t, result.Changes)
 }
@@ -169,7 +219,8 @@ func TestNormalizer_Normalize2_ProtonmailNoPunctuation(t *testing.T) {
 
 func TestNormalizer_Normalize2_Rackspace(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("Test+User@emailsrvr.com")
+	result, err := n.Normalize2("Test+User@emailsrvr.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@emailsrvr.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedPlusSigns}, result.Changes)
 }
@@ -178,7 +229,8 @@ func TestNormalizer_Normalize2_Rackspace(t *testing.T) {
 
 func TestNormalizer_Normalize2_Rambler(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("Test+User@rambler.ru")
+	result, err := n.Normalize2("Test+User@rambler.ru")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@rambler.ru", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedPlusSigns}, result.Changes)
 }
@@ -191,7 +243,8 @@ func TestNormalizer_Normalize2_Yandex(t *testing.T) {
 	// remove "+":           "testuser-name"
 	// replace "-" with ".": "testuser.name"
 	// domain: ya.ru → yandex.ru
-	result := n.Normalize2("Test+User-Name@ya.ru")
+	result, err := n.Normalize2("Test+User-Name@ya.ru")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser.name@yandex.ru", result.Normalized)
 	assert.Equal(t, []Change{
 		ChangeLowercase,
@@ -204,7 +257,8 @@ func TestNormalizer_Normalize2_Yandex(t *testing.T) {
 func TestNormalizer_Normalize2_YandexPrimaryDomain(t *testing.T) {
 	n := NewNormalizer()
 	// yandex.ru → yandex.ru: no canonicalization change
-	result := n.Normalize2("testuser@yandex.ru")
+	result, err := n.Normalize2("testuser@yandex.ru")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@yandex.ru", result.Normalized)
 	assert.Empty(t, result.Changes)
 }
@@ -213,7 +267,8 @@ func TestNormalizer_Normalize2_YandexPrimaryDomain(t *testing.T) {
 
 func TestNormalizer_Normalize2_Zoho(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("Test+User@zoho.com")
+	result, err := n.Normalize2("Test+User@zoho.com")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@zoho.com", result.Normalized)
 	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedPlusSigns}, result.Changes)
 }
@@ -224,7 +279,8 @@ func TestNormalizer_Normalize2_Zoho(t *testing.T) {
 // reported exactly once even when both the domain and username are uppercased.
 func TestNormalizer_Normalize2_LowercaseDedup(t *testing.T) {
 	n := NewNormalizer()
-	result := n.Normalize2("TESTUSER@GMAIL.COM")
+	result, err := n.Normalize2("TESTUSER@GMAIL.COM")
+	assert.NoError(t, err)
 	assert.Equal(t, "testuser@gmail.com", result.Normalized)
 	count := 0
 	for _, c := range result.Changes {
@@ -238,7 +294,7 @@ func TestNormalizer_Normalize2_LowercaseDedup(t *testing.T) {
 // --- Parity ---
 
 // TestNormalizer_Normalize2_Parity verifies that Normalize2 always produces the
-// same normalized address as Normalize for a representative set of inputs.
+// same normalized address as Normalize for a representative set of valid inputs.
 func TestNormalizer_Normalize2_Parity(t *testing.T) {
 	n := NewNormalizer()
 	emails := []string{
@@ -249,7 +305,6 @@ func TestNormalizer_Normalize2_Parity(t *testing.T) {
 		"User.Name_test-sub+tag@protonmail.com",
 		"Test+User-Name@ya.ru",
 		"Test+User@zoho.com",
-		"notanemail",
 		"User@EXAMPLE.COM",
 		"  test@gmail.com  ",
 		"test@gmail.com.",
@@ -257,7 +312,9 @@ func TestNormalizer_Normalize2_Parity(t *testing.T) {
 		"test@google.com",
 	}
 	for _, email := range emails {
-		assert.Equal(t, n.Normalize(email), n.Normalize2(email).Normalized,
+		result, err := n.Normalize2(email)
+		assert.NoError(t, err, "expected no error for input: %q", email)
+		assert.Equal(t, n.Normalize(email), result.Normalized,
 			"Normalize2 and Normalize must agree for input: %q", email)
 	}
 }
