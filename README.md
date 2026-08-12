@@ -12,6 +12,21 @@ This is Golang library for providing a canonical representation of email
 address. It allows to prevent multiple signups. `go-email-normalizer` contains
 some popular providers but you can easily append others.
 
+**What this fork adds on top of upstream:**
+
+- [`Normalize2`](#normalize2) — validates the input (RFC 5322-compatible regex)
+  instead of silently passing through malformed addresses, and returns a
+  `NormalizeResult` listing every individual transformation applied (see
+  [Change values](#change-values)), so callers can audit or log exactly what
+  changed instead of only seeing the final address.
+- An RFC compliance audit ([NORMALIZATION.md](NORMALIZATION.md)) documenting,
+  per provider, which transformations are applied and which RFC justifies them —
+  upstream applied some transformations without a documented rationale.
+- Provider rules reorganized under [`internal/rules`](internal/rules), one file
+  per provider, so the implementation is easier to study than a flat 20-file
+  package.
+- CI (GitHub Actions) and Codecov coverage reporting on every push.
+
 > **RFC compliance note:** All normalization transformations (dot removal, `+`
 > tag stripping, domain alias resolution) are applied only for specific, known
 > providers where the behavior is documented. For unknown domains the local part
@@ -122,6 +137,13 @@ fmt.Println(err) // invalid email address: "not-an-email@gmailcom"
 | `ChangeRemovedPlusSigns`        | `removed_plus_signs`         | all `+` characters removed (Microsoft, Rackspace, Rambler, Yandex, Zoho) |
 | `ChangeRemovedSubaddress`       | `removed_subaddress`         | `-tag` subaddress stripped (Yahoo)                                       |
 | `ChangeCanonicalisedDomain`     | `canonicalized_domain`       | domain rewritten to canonical form (e.g. `googlemail.com` → `gmail.com`) |
+
+## Used in production
+
+This library is used in production by [Bobadilla Tech](https://bobadilla.tech)
+clients and powers the email normalization endpoint of the
+[Requiem API](https://requiems.xyz/apis/email-normalize). It is a core component
+of our backend email handling infrastructure.
 
 ## Supported providers
 
