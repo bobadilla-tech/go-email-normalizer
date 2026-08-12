@@ -1,21 +1,21 @@
-package emailnormalizer
+package rules
 
 import "strings"
 
-// MicrosoftRule : email normalization rule for Microsoft
-type MicrosoftRule struct {
+// RackspaceRule : email normalization rule for Rackspace
+type RackspaceRule struct {
 }
 
-func (rule *MicrosoftRule) ProcessUsername(username string) string {
+func (rule *RackspaceRule) ProcessUsername(username string) string {
 	result := strings.ToLower(username)
 	return strings.Replace(result, "+", "", -1)
 }
 
-func (rule *MicrosoftRule) ProcessDomain(domain string) string {
+func (rule *RackspaceRule) ProcessDomain(domain string) string {
 	return domain
 }
 
-func (rule *MicrosoftRule) ProcessUsernameWithChanges(username string) (string, []Change) {
+func (rule *RackspaceRule) ProcessUsernameWithChanges(username string) (string, []Change) {
 	var changes []Change
 
 	result := strings.ToLower(username)
@@ -31,6 +31,6 @@ func (rule *MicrosoftRule) ProcessUsernameWithChanges(username string) (string, 
 	return withoutPlus, changes
 }
 
-func (rule *MicrosoftRule) ProcessDomainWithChanges(domain string) (string, []Change) {
+func (rule *RackspaceRule) ProcessDomainWithChanges(domain string) (string, []Change) {
 	return rule.ProcessDomain(domain), nil
 }

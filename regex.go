@@ -17,5 +17,6 @@ func ValidateEmail(email string) error {
 	if !emailRegex.MatchString(email) {
 		return fmt.Errorf("invalid email address: %q", email)
 	}
+
 	return nil
 }

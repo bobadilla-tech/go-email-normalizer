@@ -1,18 +1,18 @@
-package emailnormalizer
+package rules
 
-var fastmailDomains = []string{
+var FastmailDomains = []string{
 	"fastmail.com",
 	"messagingengine.com",
 	"fastmail.fm",
 }
 
-var appleDomains = []string{
+var AppleDomains = []string{
 	"icloud.com",
 	"me.com",
 	"mac.com",
 }
 
-var yahooDomains = []string{
+var YahooDomains = []string{
 	"yahoo.com.ar",
 	"yahoo.com.au",
 	"yahoo.at",
@@ -64,13 +64,13 @@ var yahooDomains = []string{
 	"yahoodns.net",
 }
 
-var googleDomains = []string{
+var GoogleDomains = []string{
 	"gmail.com",
 	"googlemail.com",
 	"google.com",
 }
 
-var ramblerDomains = []string{
+var RamblerDomains = []string{
 	"rambler.ru",
 	"lenta.ru",
 	"autorambler.ru",
@@ -78,7 +78,7 @@ var ramblerDomains = []string{
 	"ro.ru",
 }
 
-var microsoftDomains = []string{
+var MicrosoftDomains = []string{
 	"hotmail.com",
 	"hotmail.at",
 	"hotmail.be",
@@ -163,7 +163,7 @@ var microsoftDomains = []string{
 	"passport.com",
 }
 
-var yandexDomains = []string{
+var YandexDomains = []string{
 	"narod.ru",
 	"yandex.ru",
 	"yandex.org",
@@ -207,7 +207,7 @@ var yandexDomains = []string{
 	"yandex.mobi",
 }
 
-var protonmailDomains = []string{
+var ProtonmailDomains = []string{
 	"protonmail.ch",
 	"protonmail.com",
 	"proton.me",

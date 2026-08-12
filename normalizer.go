@@ -2,6 +2,8 @@ package emailnormalizer
 
 import (
 	"strings"
+
+	"github.com/bobadilla-tech/go-email-normalizer/internal/rules"
 )
 
 // Normalizer : main library object for normalization emails
@@ -11,51 +13,51 @@ type Normalizer struct {
 
 // NewNormalizer : creates Normalizer instance
 func NewNormalizer() *Normalizer {
-	rules := make(map[string]NormalizingRule)
+	registry := make(map[string]NormalizingRule)
 
-	microsoftRule := &MicrosoftRule{}
-	for _, domain := range microsoftDomains {
-		rules[domain] = microsoftRule
+	microsoftRule := &rules.MicrosoftRule{}
+	for _, domain := range rules.MicrosoftDomains {
+		registry[domain] = microsoftRule
 	}
 
-	yahooRule := &YahooRule{}
-	for _, domain := range yahooDomains {
-		rules[domain] = yahooRule
+	yahooRule := &rules.YahooRule{}
+	for _, domain := range rules.YahooDomains {
+		registry[domain] = yahooRule
 	}
 
-	googleRule := &GoogleRule{}
-	for _, domain := range googleDomains {
-		rules[domain] = googleRule
+	googleRule := &rules.GoogleRule{}
+	for _, domain := range rules.GoogleDomains {
+		registry[domain] = googleRule
 	}
 
-	fastmailRule := &FastmailRule{}
-	for _, domain := range fastmailDomains {
-		rules[domain] = fastmailRule
+	fastmailRule := &rules.FastmailRule{}
+	for _, domain := range rules.FastmailDomains {
+		registry[domain] = fastmailRule
 	}
 
-	ramblerRule := &RamblerRule{}
-	for _, domain := range ramblerDomains {
-		rules[domain] = ramblerRule
+	ramblerRule := &rules.RamblerRule{}
+	for _, domain := range rules.RamblerDomains {
+		registry[domain] = ramblerRule
 	}
 
-	yandexRule := &YandexRule{}
-	for _, domain := range yandexDomains {
-		rules[domain] = yandexRule
+	yandexRule := &rules.YandexRule{}
+	for _, domain := range rules.YandexDomains {
+		registry[domain] = yandexRule
 	}
 
-	protonmailRule := &ProtonmailRule{}
-	for _, domain := range protonmailDomains {
-		rules[domain] = protonmailRule
+	protonmailRule := &rules.ProtonmailRule{}
+	for _, domain := range rules.ProtonmailDomains {
+		registry[domain] = protonmailRule
 	}
 
-	appleRule := &AppleRule{}
-	for _, domain := range appleDomains {
-		rules[domain] = appleRule
+	appleRule := &rules.AppleRule{}
+	for _, domain := range rules.AppleDomains {
+		registry[domain] = appleRule
 	}
 
-	rules["emailsrvr.com"] = &RackspaceRule{}
-	rules["zoho.com"] = &ZohoRule{}
-	return &Normalizer{rules: rules}
+	registry["emailsrvr.com"] = &rules.RackspaceRule{}
+	registry["zoho.com"] = &rules.ZohoRule{}
+	return &Normalizer{rules: registry}
 }
 
 // AddRule : appends custom normalization rule

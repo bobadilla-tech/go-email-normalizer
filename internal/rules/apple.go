@@ -1,4 +1,4 @@
-package emailnormalizer
+package rules
 
 import "strings"
 
@@ -25,11 +25,13 @@ func (rule *AppleRule) ProcessUsernameWithChanges(username string) (string, []Ch
 	var changes []Change
 
 	result := strings.ToLower(username)
+
 	if result != username {
 		changes = append(changes, ChangeLowercase)
 	}
 
 	plusIndex := strings.Index(result, "+")
+
 	if plusIndex != -1 {
 		changes = append(changes, ChangeRemovedPlusTag)
 		result = result[:plusIndex]
@@ -40,8 +42,10 @@ func (rule *AppleRule) ProcessUsernameWithChanges(username string) (string, []Ch
 
 func (rule *AppleRule) ProcessDomainWithChanges(domain string) (string, []Change) {
 	result := rule.ProcessDomain(domain)
+
 	if result != domain {
 		return result, []Change{ChangeCanonicalisedDomain}
 	}
+
 	return result, nil
 }

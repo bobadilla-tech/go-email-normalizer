@@ -1,4 +1,4 @@
-package emailnormalizer
+package rules
 
 import (
 	"testing"

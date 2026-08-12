@@ -13,7 +13,9 @@ Protonmail, Rackspace, Rambler, Yahoo, Yandex, Zoho).
 
 - **Module:** `github.com/bobadilla-tech/go-email-normalizer`
 - **Minimum Go version:** 1.14
-- **Package name:** `emailnormalizer` (all files in root, no subdirectories)
+- **Package name:** `emailnormalizer` (public API, root directory). Provider
+  rule implementations live in the unexported `internal/rules` subpackage
+  (package name `rules`), invisible to external importers.
 - **Only external dependency:** `github.com/stretchr/testify v1.6.1` (test
   assertions)
 
@@ -80,24 +82,43 @@ only `go test` and `go vet` are expected to pass.
 
 ## Project Structure
 
-The repository is a **flat single-package layout**. All `.go` files live in the
-root directory.
+The public API (root package) is thin: it wires providers together and exposes
+`Normalize`/`Normalize2`/`AddRule`. Each provider's implementation lives in
+`internal/rules`, one file per provider, so studying "how does Google's rule
+work" means opening one small file instead of scanning a flat 20-file directory.
 
 ```
 go-email-normalizer/
-├── rule.go              # NormalizingRule interface
-├── normalizer.go        # Normalizer struct, NewNormalizer, Normalize, AddRule
-├── domains.go           # Per-provider domain slice vars
-├── <provider>_rule.go   # One file per provider (implements NormalizingRule)
-└── <provider>_rule_test.go
+├── rule.go                    # NormalizingRule / NormalizingRuleWithChanges interfaces
+├── normalizer.go               # Normalizer struct, NewNormalizer, Normalize, AddRule
+├── change.go                    # Change / NormalizeResult (aliases rules.Change — see below)
+├── regex.go                    # ValidateEmail (used by Normalize2)
+└── internal/rules/             # unexported: provider rule implementations
+    ├── change.go                # Change type + Change* constants (owned here)
+    ├── domains.go                # Per-provider domain slice vars (exported: MicrosoftDomains, ...)
+    ├── <provider>.go             # One file per provider (implements NormalizingRule)
+    └── <provider>_test.go
 ```
+
+`internal/rules` is a leaf package (no imports from the root package), which is
+what avoids an import cycle: the root package imports `internal/rules` to
+construct `&rules.GoogleRule{}` etc., and `Change` is defined in
+`internal/rules` with the root's `Change` declared as a type alias
+(`type Change = rules.Change`) plus re-exported constants. Because Go
+`internal/` packages cannot be imported outside this module, none of this is
+visible to external importers — the public API surface (`Normalize`,
+`Normalize2`, `AddRule`, `Change`, `NormalizeResult`, `NormalizingRule`) is
+unchanged.
 
 When adding a new provider, follow this pattern:
 
-1. Add domain(s) to `domains.go` as a `var <provider>Domains = []string{...}`.
-2. Create `<provider>_rule.go` with a struct implementing `NormalizingRule`.
-3. Register all domains in `NewNormalizer()` inside `normalizer.go`.
-4. Create `<provider>_rule_test.go` with `Test<Provider>Username` and
+1. Add domain(s) to `internal/rules/domains.go` as
+   `var <Provider>Domains = []string{...}` (exported — root needs to read it).
+2. Create `internal/rules/<provider>.go` with a struct implementing
+   `NormalizingRule` (and `NormalizingRuleWithChanges` if it reports changes).
+3. Register all domains in `NewNormalizer()` inside root `normalizer.go`,
+   referencing `rules.<Provider>Rule{}` / `rules.<Provider>Domains`.
+4. Create `internal/rules/<provider>_test.go` with `Test<Provider>Username` and
    `Test<Provider>Domain`.
 
 ---
