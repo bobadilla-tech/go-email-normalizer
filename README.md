@@ -1,16 +1,18 @@
 # go-email-normalizer
 
-> Fork of [dimuska139/go-email-normalizer](https://github.com/dimuska139/go-email-normalizer)
+> Fork of
+> [dimuska139/go-email-normalizer](https://github.com/dimuska139/go-email-normalizer)
 
-This is Golang library for providing a canonical representation of email address. It allows
-to prevent multiple signups. `go-email-normalizer` contains some popular providers but you can easily append others.
+This is Golang library for providing a canonical representation of email
+address. It allows to prevent multiple signups. `go-email-normalizer` contains
+some popular providers but you can easily append others.
 
-> **RFC compliance note:** All normalization transformations (dot removal, `+` tag
-> stripping, domain alias resolution) are applied only for specific, known providers
-> where the behavior is documented. For unknown domains the local part is returned
-> unchanged, consistent with RFC 5321 which treats the local part as opaque to
-> external systems. See [NORMALIZATION.md](NORMALIZATION.md) for the full audit
-> and per-provider rule reference.
+> **RFC compliance note:** All normalization transformations (dot removal, `+`
+> tag stripping, domain alias resolution) are applied only for specific, known
+> providers where the behavior is documented. For unknown domains the local part
+> is returned unchanged, consistent with RFC 5321 which treats the local part as
+> opaque to external systems. See [NORMALIZATION.md](NORMALIZATION.md) for the
+> full audit and per-provider rule reference.
 
 ## Usage
 
@@ -53,8 +55,8 @@ func main() {
 
 ### Normalize2
 
-`Normalize2` accepts any string, validates it as an email address using an
-RFC 5322-compatible regex (sourced from
+`Normalize2` accepts any string, validates it as an email address using an RFC
+5322-compatible regex (sourced from
 [go-playground/validator](https://github.com/go-playground/validator)), and
 returns a `NormalizeResult` paired with an `error`. The validator requires a
 dot-separated domain (e.g. `gmail.com`), so inputs like `user@gmailcom` are
@@ -102,34 +104,35 @@ fmt.Println(err) // invalid email address: "not-an-email@gmailcom"
 
 #### Change values
 
-| Constant | Value | Produced by |
-|---|---|---|
-| `ChangeTrimmedWhitespace` | `trimmed_whitespace` | leading/trailing whitespace stripped |
-| `ChangeRemovedTrailingDot` | `removed_trailing_dot` | trailing dot stripped from raw input |
-| `ChangeLowercase` | `lowercase` | username or domain uppercased → lowercased |
-| `ChangeRemovedDots` | `removed_dots` | dots removed from username (Google, Protonmail) |
-| `ChangeRemovedUnderscores` | `removed_underscores` | underscores removed from username (Protonmail) |
-| `ChangeRemovedHyphens` | `removed_hyphens` | hyphens removed from username (Protonmail) |
-| `ChangeReplacedHyphensWithDots` | `replaced_hyphens_with_dots` | hyphens replaced with dots in username (Yandex) |
-| `ChangeRemovedPlusTag` | `removed_plus_tag` | `+tag` subaddress stripped (Google, Apple, Fastmail, Protonmail) |
-| `ChangeRemovedPlusSigns` | `removed_plus_signs` | all `+` characters removed (Microsoft, Rackspace, Rambler, Yandex, Zoho) |
-| `ChangeRemovedSubaddress` | `removed_subaddress` | `-tag` subaddress stripped (Yahoo) |
-| `ChangeCanonicalisedDomain` | `canonicalized_domain` | domain rewritten to canonical form (e.g. `googlemail.com` → `gmail.com`) |
+| Constant                        | Value                        | Produced by                                                              |
+| ------------------------------- | ---------------------------- | ------------------------------------------------------------------------ |
+| `ChangeTrimmedWhitespace`       | `trimmed_whitespace`         | leading/trailing whitespace stripped                                     |
+| `ChangeRemovedTrailingDot`      | `removed_trailing_dot`       | trailing dot stripped from raw input                                     |
+| `ChangeLowercase`               | `lowercase`                  | username or domain uppercased → lowercased                               |
+| `ChangeRemovedDots`             | `removed_dots`               | dots removed from username (Google, Protonmail)                          |
+| `ChangeRemovedUnderscores`      | `removed_underscores`        | underscores removed from username (Protonmail)                           |
+| `ChangeRemovedHyphens`          | `removed_hyphens`            | hyphens removed from username (Protonmail)                               |
+| `ChangeReplacedHyphensWithDots` | `replaced_hyphens_with_dots` | hyphens replaced with dots in username (Yandex)                          |
+| `ChangeRemovedPlusTag`          | `removed_plus_tag`           | `+tag` subaddress stripped (Google, Apple, Fastmail, Protonmail)         |
+| `ChangeRemovedPlusSigns`        | `removed_plus_signs`         | all `+` characters removed (Microsoft, Rackspace, Rambler, Yandex, Zoho) |
+| `ChangeRemovedSubaddress`       | `removed_subaddress`         | `-tag` subaddress stripped (Yahoo)                                       |
+| `ChangeCanonicalisedDomain`     | `canonicalized_domain`       | domain rewritten to canonical form (e.g. `googlemail.com` → `gmail.com`) |
 
 ## Supported providers
 
-* Apple
-* Fastmail
-* Google
-* Microsoft
-* Protonmail
-* Rackspace
-* Rambler
-* Yahoo
-* Yandex
-* Zoho
+- Apple
+- Fastmail
+- Google
+- Microsoft
+- Protonmail
+- Rackspace
+- Rambler
+- Yahoo
+- Yandex
+- Zoho
 
-Also you can integrate other rules using `AddRule` function (see an example above)
+Also you can integrate other rules using `AddRule` function (see an example
+above)
 
 For a detailed breakdown of which transformations each provider applies and the
 RFC standards behind them, see [NORMALIZATION.md](NORMALIZATION.md).
