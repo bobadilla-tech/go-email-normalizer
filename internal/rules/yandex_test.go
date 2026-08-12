@@ -21,3 +21,25 @@ func TestYandexDomain(t *testing.T) {
 	assert.Equal(t, "yandex.ru", rule.ProcessDomain("yandex.ua"))
 	assert.Equal(t, "yandex.ru", rule.ProcessDomain("yandex.kz"))
 }
+
+func TestYandexUsernameWithChanges(t *testing.T) {
+	rule := YandexRule{}
+	result, changes := rule.ProcessUsernameWithChanges("Test+User-Name")
+	assert.Equal(t, "testuser.name", result)
+	assert.Equal(t, []Change{ChangeLowercase, ChangeRemovedPlusSigns, ChangeReplacedHyphensWithDots}, changes)
+
+	result, changes = rule.ProcessUsernameWithChanges("testuser")
+	assert.Equal(t, "testuser", result)
+	assert.Nil(t, changes)
+}
+
+func TestYandexDomainWithChanges(t *testing.T) {
+	rule := YandexRule{}
+	result, changes := rule.ProcessDomainWithChanges("yandex.ru")
+	assert.Equal(t, "yandex.ru", result)
+	assert.Nil(t, changes)
+
+	result, changes = rule.ProcessDomainWithChanges("ya.ru")
+	assert.Equal(t, "yandex.ru", result)
+	assert.Equal(t, []Change{ChangeCanonicalisedDomain}, changes)
+}

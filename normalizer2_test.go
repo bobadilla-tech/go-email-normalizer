@@ -94,6 +94,18 @@ func TestNormalizer_Normalize2_UnknownDomain(t *testing.T) {
 	assert.Equal(t, []Change{ChangeLowercase}, result.Changes)
 }
 
+// TestNormalizer_Normalize2_RuleWithoutChanges verifies that a rule registered via
+// AddRule that only implements NormalizingRule (not NormalizingRuleWithChanges)
+// still normalizes correctly, but reports no per-rule changes.
+func TestNormalizer_Normalize2_RuleWithoutChanges(t *testing.T) {
+	n := NewNormalizer()
+	n.AddRule("email.com", &fakeRule{})
+	result, err := n.Normalize2("user@email.com")
+	assert.NoError(t, err)
+	assert.Equal(t, "test@email.com", result.Normalized)
+	assert.Empty(t, result.Changes)
+}
+
 // TestNormalizer_Normalize2_UnknownDomainAlreadyLower verifies that no changes are
 // reported when an unknown domain is already lowercase.
 func TestNormalizer_Normalize2_UnknownDomainAlreadyLower(t *testing.T) {

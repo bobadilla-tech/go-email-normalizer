@@ -15,6 +15,30 @@ func TestProtonmailDomain(t *testing.T) {
 	assert.Equal(t, "protonmail.ch", rule.ProcessDomain("protonmail.ch"))
 }
 
+func TestProtonmailUsernameWithChanges(t *testing.T) {
+	rule := ProtonmailRule{}
+	result, changes := rule.ProcessUsernameWithChanges("User.Name_test-sub+tag")
+	assert.Equal(t, "usernametestsub", result)
+	assert.Equal(t, []Change{
+		ChangeLowercase,
+		ChangeRemovedDots,
+		ChangeRemovedUnderscores,
+		ChangeRemovedHyphens,
+		ChangeRemovedPlusTag,
+	}, changes)
+
+	result, changes = rule.ProcessUsernameWithChanges("username")
+	assert.Equal(t, "username", result)
+	assert.Nil(t, changes)
+}
+
+func TestProtonmailDomainWithChanges(t *testing.T) {
+	rule := ProtonmailRule{}
+	result, changes := rule.ProcessDomainWithChanges("protonmail.com")
+	assert.Equal(t, "protonmail.com", result)
+	assert.Nil(t, changes)
+}
+
 func TestProtonmailRule_ProcessUsername(t *testing.T) {
 	type args struct {
 		username string

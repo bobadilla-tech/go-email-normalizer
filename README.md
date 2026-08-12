@@ -9,23 +9,18 @@
 > [dimuska139/go-email-normalizer](https://github.com/dimuska139/go-email-normalizer)
 
 This is Golang library for providing a canonical representation of email
-address. It allows to prevent multiple signups. `go-email-normalizer` contains
-some popular providers but you can easily append others.
+address. It allows to prevent multiple signups. This module contains some
+popular providers but you can easily append others.
 
 **What this fork adds on top of upstream:**
 
-- [`Normalize2`](#normalize2) — validates the input (RFC 5322-compatible regex)
+- [`Normalize2`](#normalize2): validates the input (RFC 5322-compatible regex)
   instead of silently passing through malformed addresses, and returns a
   `NormalizeResult` listing every individual transformation applied (see
   [Change values](#change-values)), so callers can audit or log exactly what
   changed instead of only seeing the final address.
 - An RFC compliance audit ([NORMALIZATION.md](NORMALIZATION.md)) documenting,
-  per provider, which transformations are applied and which RFC justifies them —
-  upstream applied some transformations without a documented rationale.
-- Provider rules reorganized under [`internal/rules`](internal/rules), one file
-  per provider, so the implementation is easier to study than a flat 20-file
-  package.
-- CI (GitHub Actions) and Codecov coverage reporting on every push.
+  per provider, which transformations are applied and which RFC justifies them.
 
 > **RFC compliance note:** All normalization transformations (dot removal, `+`
 > tag stripping, domain alias resolution) are applied only for specific, known
