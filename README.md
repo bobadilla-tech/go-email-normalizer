@@ -1,5 +1,10 @@
 # go-email-normalizer
 
+[![CI](https://github.com/bobadilla-tech/go-email-normalizeractions/workflows/ci.yml/badge.svg)](https://github.com/bobadilla-tech/go-email-normalizeractions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/bobadilla-tech/go-email-normalizergraph/badge.svg)](https://codecov.io/gh/bobadilla-tech/go-package)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bobadilla-tech/go-package.svg)](https://pkg.go.dev/github.com/bobadilla-tech/go-package)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > Fork of
 > [dimuska139/go-email-normalizer](https://github.com/dimuska139/go-email-normalizer)
 
